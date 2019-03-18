@@ -10,8 +10,11 @@
 
 ###########################################################
 #
-# Choose remote host to update package tree. Optionally,
+# Choose remote host to upgrade packages. Optionally,
 # indicate if host is reachable via primitive PING test.
+#
+# It is herein assumed that package tree was initially
+# updated beforehand.
 #
 function printScreenUPGRADE()
 {
