@@ -1,0 +1,71 @@
+# DESCRIPTION Upgrade remote host system packages
+
+[[ -f "common/getHostINFO" ]] && \
+    source "common/getHostINFO" || \
+    exit 1;
+
+[[ -f "common/checkHOST" ]] && \
+    source "common/checkHOST" || \
+    exit 1;
+
+###########################################################
+#
+# Choose remote host to upgrade system packages. Optionally,
+# indicate if host is reachable via primitive PING test.
+#
+# It is herein assumed that package tree was intially
+# updated beforehand.
+#
+function printScreenUPGRADEDIST()
+{
+    clear;
+
+    local STR SEL;
+
+    STR+="Remote System Management\n\n";
+    STR+="Select remote host to upgrade system packages:\n";
+    for COUNT in "${!ENUMSRV[@]}"; do
+        # Array indexes are zero-based, which is not
+        # truly human-friendly, thus first increase
+        # the COUNT, but to reflect correct array
+        # KEY/VALUE, it shall be decreased back
+        STR+="$((++COUNT)) - ";
+        STR+=$( [[ ${FLAG[DISABLE_TEST]} -eq 0 ]] && checkHOST ${ENUMSRV[$((--COUNT))]} );
+        STR+=" ";
+        STR+=$( getDESC ${ENUMSRV[$((--COUNT))]} );
+        STR+="\n";
+    done
+    STR+="R - Return\n";
+    STR+="Q - Quit\n";
+
+    echo -e $STR;
+
+    if [[ ! -z "$1" && ! $1 -eq 0 ]]; then
+        SEL=$1;
+        echo "Your selection: " $SEL;
+        sleep 3;
+    else
+        read -p "Your selection: " SEL;
+    fi
+
+    if [[ $SEL -gt 0 && $SEL -le ${#HOSTS[@]} ]]; then
+        source common/upgradeDistHOST;
+        local HOST=${ENUMSRV[$((--SEL))]};
+        upgradeDistHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        [[ $? -ne 0 ]] && echo ">>>>> Error: can't upgrade system packages. <<<<<";
+        sleep 3;
+        ${FUNCNAME[0]};
+    elif [[ "$SEL" =~ [Rr] ]]; then
+        printScreen;
+    elif [[ "$SEL" =~ [Qq] ]]; then
+        clear;
+        exit 0;
+    else
+
+        # Wrong option selected or omitted
+        # Inform, sleep for a while, re-run self
+        echo "Choose options 1 through ${#ENUMSRV[@]} to upgrade host, R to return tom ain screen or Q to exit.";
+        sleep 3;
+        ${FUNCNAME[0]};
+    fi
+}
