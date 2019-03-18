@@ -1,0 +1,17 @@
+function readCFG()
+{
+    local HOST;
+
+    for HOST in `awk '/^\[/' $CFG_HOST`; do
+        unset ARGH;
+        declare -A ARGH;
+
+        while read KEY VAL; do
+            ARGH[$(echo ${KEY,,})]=$VAL;
+        done < <(awk -F'=' '/\[/ {x=0} x==1 && $0~/=/ && NF==2 {print $1, $2} $0==INI {x=1}' INI="$HOST" $CFG_HOST);
+
+        HOST=$(echo ${HOST,,} | sed 's/\(\[\)\(.*\)\(\]\)/\2/');
+
+        HOSTS+=( [$HOST]="${ARGH['desc']}|${ARGH['login']}|${ARGH['keys']}" );
+    done
+}

@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+
+
+###########################################################
+#
+# This is main routing hub acting like a starting point
+# for all other sub-scripts.
+#
+#                    -= Scenario 1 =-
+# In case no arguments are provided, construct and display
+# a list of options available to the user:
+#
+# 1. connect to remote host terminal
+# 2. update package tree on remote host
+# 3. upgrade dated packages on remote host
+# q. quit
+#
+# Depending on the selected option, load action script and
+# run without arguments. Wait for the exit code and
+# self-reload until user explicitly quits the script.
+#
+#                    -= Scenario 2 =-
+# When arguments are provided to this routing hub, run
+# sub-scripts immediately and pass corresponding arguments.
+#
+# On sub-script completion, return to display a list of
+# available options.
+#
+
+
+###########################################################
+#
+# Variables
+#
+CFG_HOST="config/hosts";
+FLAG[DISABLE_TEST]=0;
+
+#######################################
+#
+# FUNCTIONS
+#
+declare -A FUNCTIONS;
+for FILE in $( ls action ); do
+    FUNCTIONS+=( \
+        [$FILE]=$( \
+            awk ' \
+                BEGIN {FS="DESCRIPTION"} \
+                /DESCRIPTION/ {print $2}' \
+            action/$FILE) );
+done
+
+#######################################
+#
+# FUNCTIONS enumerated and sorted
+#
+declare ENUMFUNC;
+while IFS= read -rd '' FUNCTION; do
+    ENUMFUNC+=("$FUNCTION");
+done < <(printf '%s\0' "${!FUNCTIONS[@]}" | sort -z);
+
+#######################################
+#
+# HOSTS
+#
+declare -A HOSTS;
+if [[ -f common/readCFG ]]; then
+    source common/readCFG;
+    readCFG;
+else
+    clear;
+    echo ">>>>> Error: configuration not found <<<<<";
+    sleep 1;
+    exit 1;
+fi
+
+#######################################
+#
+# HOSTS enumerated and sorted
+#
+declare ENUMSRV;
+while IFS= read -rd '' HOST; do
+    ENUMSRV+=("$HOST");
+done < <(printf '%s\0' "${!HOSTS[@]}" | sort -z);
+
+
+###########################################################
+#
+# printScreen
+#
+# Construct and display a list of options, available to the
+# user. Let user select an option and proceed accordingly.
+#
+function printScreen()
+{
+    clear;
+
+    local STR SELECTOR;
+
+    STR+="Remote System Management\n\n";
+    for COUNT in "${!ENUMFUNC[@]}"; do
+        # Array indexes are zero-based, which is not
+        # truly human-friendly, thus first increase
+        # the COUNT, but to reflect correct array
+        # KEY/VALUE, it shall be decreased back
+        STR+="$((++COUNT)) - ${FUNCTIONS[${ENUMFUNC[$((--COUNT))]}]}\n";
+    done
+    STR+="Q - Quit\n ";
+
+    echo -e $STR;
+
+    read -p "Your selection: " SELECTOR;
+
+    if [[ $SELECTOR -gt 0 && $SELECTOR -le ${#ENUMFUNC[@]} ]]; then
+
+        # Indexes are zero-based, decrement SELECTOR
+        ((--SELECTOR));
+
+        # Correct option is selected, load sub-script
+        # Run its printScreen$SUBSCRIPT function
+        # On sub-script exit, re-run local script or exit
+        local FILE="action/${ENUMFUNC[$SELECTOR]}";
+        local FUNC="printScreen"$( echo ${ENUMFUNC[$SELECTOR]^^} );
+        if [[ -f $FILE ]]; then
+            source $FILE;
+            $FUNC;
+#            [[ $? ]] && ${FUNCNAME[0]} || exit $?;
+        else
+            echo ">>>>> Error: $FILE sub-script file not found <<<<<";
+            exit $?;
+        fi
+
+    elif [[ "$SELECTOR" =~ [Qq] ]]; then
+
+        # User requested exit
+        clear;
+        exit 0;
+
+    else
+
+        # Wrong option selected or omitted
+        # Inform, sleep for a while, re-run self
+        echo "Choose options 1 through ${#ENUMFUNC[@]} or \"Q\" to exit."
+        sleep 3;
+        ${FUNCNAME[0]};
+
+    fi
+}
+
+
+###########################################################
+#
+# Arguments
+#
+if [[ $# -gt 0 ]]; then
+
+    OPTIONS=$( getopt \
+               --options "c" \
+               --options "u" \
+               --longoptions "connect" \
+               --longoptions "update" \
+               -- "$@" );
+
+    while true
+    do
+        case "$1" in
+            -c|--connect) echo 1 ;;
+        esac
+    done
+
+else
+
+    printScreen;
+
+fi
+
+exit $?

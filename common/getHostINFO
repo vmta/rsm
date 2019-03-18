@@ -1,0 +1,23 @@
+#####################################################################
+#
+# Retrieve remote host description from HOSTS array.
+#
+function getDESC()
+{
+    echo ${HOSTS[$1]} | awk -F'|' '{print $1}';
+}
+#####################################################################
+#
+# Retrieve remote host login from HOSTS array.
+#
+function getLOGIN()
+{
+    echo ${HOSTS[$1]} | awk -F'|' '{print $2}';
+}
+#####################################################################
+#
+# Retrieve remote host SSH keys if any, from HOSTS array.
+function getKEYS()
+{
+    echo ${HOSTS[$1]} | awk -F'|' '{print $3}';
+}
