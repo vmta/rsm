@@ -33,7 +33,22 @@
 # Variables
 #
 CFG_HOST="config/hosts";
-FLAG[DISABLE_TEST]=0;
+declare -A FLAG=( \
+          [DISABLE_TEST]=0 \
+          [UPDATE]=0 \
+          [UPGRADE]=0 \
+          [UPGRADEDIST]=0 \
+        );
+declare CONNECT_TO=();
+#FLAG[DISABLE_TEST]=0;
+
+
+#######################################
+#
+# SOURCES
+#
+source common/arrayFUNC;
+
 
 #######################################
 #
@@ -53,10 +68,11 @@ done
 #
 # FUNCTIONS enumerated and sorted
 #
-declare ENUMFUNC;
-while IFS= read -rd '' FUNCTION; do
-    ENUMFUNC+=("$FUNCTION");
-done < <(printf '%s\0' "${!FUNCTIONS[@]}" | sort -z);
+declare ENUMFUNC=( $( arrayENUM "${!FUNCTIONS[@]}" ) );
+#declare ENUMFUNC;
+#while IFS= read -rd '' FUNCTION; do
+#    ENUMFUNC+=("$FUNCTION");
+#done < <(printf '%s\0' "${!FUNCTIONS[@]}" | sort -z);
 
 #######################################
 #
@@ -77,10 +93,11 @@ fi
 #
 # HOSTS enumerated and sorted
 #
-declare ENUMSRV;
-while IFS= read -rd '' HOST; do
-    ENUMSRV+=("$HOST");
-done < <(printf '%s\0' "${!HOSTS[@]}" | sort -z);
+declare ENUMSRV=( $( arrayENUM "${!HOSTS[@]}" ) );
+#declare ENUMSRV;
+#while IFS= read -rd '' HOST; do
+#    ENUMSRV+=("$HOST");
+#done < <(printf '%s\0' "${!HOSTS[@]}" | sort -z);
 
 
 ###########################################################
@@ -95,6 +112,7 @@ function printScreen()
     clear;
 
     local STR SELECTOR;
+    SELECTOR=${1:-0}
 
     STR+="Remote System Management\n\n";
     for COUNT in "${!ENUMFUNC[@]}"; do
@@ -108,7 +126,17 @@ function printScreen()
 
     echo -e $STR;
 
-    read -p "Your selection: " SELECTOR;
+    if [[ ${FLAG[CONNECT]} -eq 1 ]]; then
+        SELECTOR=$( getKEYbyVAL "connect" "${ENUMFUNC[@]}" );
+    elif [[ ${FLAG[UPDATE]} -eq 1 ]]; then
+        SELECTOR=$( getKEYbyVAL "update" "${ENUMFUNC[@]}" );
+    elif [[ ${FLAG[UPGRADE]} -eq 1 ]]; then
+        SELECTOR=$( getKEYbyVAL "upgrade" "${ENUMFUNC[@]}" );
+    elif [[ ${FLAG[UPGRADEDIST]} -eq 1 ]]; then
+        SELECTOR=$( getKEYbyVAL "upgradedist" "${ENUMFUNC[@]}" );
+    else
+        read -p "Your selection: " SELECTOR;
+    fi
 
     if [[ $SELECTOR -gt 0 && $SELECTOR -le ${#ENUMFUNC[@]} ]]; then
 
@@ -123,7 +151,8 @@ function printScreen()
         if [[ -f $FILE ]]; then
             source $FILE;
             $FUNC;
-#            [[ $? ]] && ${FUNCNAME[0]} || exit $?;
+            [[ $? -ne 0 ]] && echo ">>>>> Error: unknown error <<<<<";
+            ${FUNCNAME[0]};
         else
             echo ">>>>> Error: $FILE sub-script file not found <<<<<";
             exit $?;
@@ -154,23 +183,68 @@ function printScreen()
 if [[ $# -gt 0 ]]; then
 
     OPTIONS=$( getopt \
-               --options "c" \
-               --options "u" \
-               --longoptions "connect" \
-               --longoptions "update" \
+               --options cu \
+               --longoptions connect-to:,no-ping,update,upgrade,dist-upgrade \
+               --name "$(basename "$0")" \
                -- "$@" );
+
+    eval set -- $OPTIONS;
 
     while true
     do
         case "$1" in
-            -c|--connect) echo 1 ;;
+
+            -c)
+              # Skip Main screen and load Connection screen
+              FLAG[CONNECT]=1;
+#              shift;
+              ;;
+
+            --connect-to)
+              # Direct connection to specified remote host
+              FLAG[CONNECT]=1;
+              while true
+              do
+                  CONNECT_TO+=( $2 );
+                  shift;
+              done
+#              shift;
+              ;;
+
+            --no-ping)
+              # Disable PING test
+              FLAG[DISABLE_TEST]=1;
+#              shift;
+              ;;
+
+            -u|--update)
+              # Skip Main screen and load package tree update screen
+              FLAG[UPDATE]=1;
+              ;;
+
+            --upgrade)
+              # Skip Main screen and load package upgrade screen
+              FLAG[UPGRADE]=1;
+              ;;
+
+            --dist-upgrade)
+              # Skip Main screen and load system package upgrade screen
+              FLAG[UPGRADEDIST]=1;
+              ;;
+
+            --)
+              shift;
+              break;
+              ;;
+
         esac
+
+        shift;
+
     done
 
-else
-
-    printScreen;
-
 fi
+
+printScreen;
 
 exit $?
