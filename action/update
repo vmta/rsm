@@ -46,17 +46,28 @@ function printScreenUPDATE()
     fi
 
     if [[ $SEL -gt 0 && $SEL -le ${#HOSTS[@]} ]]; then
+
         source common/updateHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
         updateHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't update package tree. <<<<<";
         sleep 3;
+
+        # Clear flag and reload the package tree update selection screen
+        FLAG[UPDATE]=0;
         ${FUNCNAME[0]};
+
     elif [[ "$SEL" =~ [Rr] ]]; then
+
+        # Clear flag and return to main screen
+        FLAG[UPDATE]=0;
         printScreen;
+
     elif [[ "$SEL" =~ [Qq] ]]; then
+
         clear;
         exit 0;
+
     else
 
         # Wrong option selected or omitted
@@ -64,5 +75,6 @@ function printScreenUPDATE()
         echo "Choose options 1 through ${#ENUMSRV[@]} to update host, R to return tom ain screen or Q to exit.";
         sleep 3;
         ${FUNCNAME[0]};
+
     fi
 }

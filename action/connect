@@ -46,17 +46,28 @@ function printScreenCONNECT()
     fi
 
     if [[ $SEL -gt 0 && $SEL -le ${#HOSTS[@]} ]]; then
+
         source common/connectTERM;
         local HOST=${ENUMSRV[$((--SEL))]};
         connectTERM $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't login or exit not clean. <<<<<";
         sleep 3;
+
+        # Clear flag and reload the connection selection screen
+        FLAG[CONNECT]=0;
         ${FUNCNAME[0]};
+
     elif [[ "$SEL" =~ [Rr] ]]; then
+
+        # Clear flag and return to main screen
+        FLAG[CONNECT]=0;
         printScreen;
+
     elif [[ "$SEL" =~ [Qq] ]]; then
+
         clear;
         exit 0;
+
     else
 
         # Wrong option selected or omitted
@@ -64,5 +75,6 @@ function printScreenCONNECT()
         echo "Choose between 1 and ${#ENUMSRV[@]} to connect to host, R to return to main screen or Q to exit.";
         sleep 3;
         ${FUNCNAME[0]};
+
     fi
 }

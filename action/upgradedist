@@ -49,17 +49,28 @@ function printScreenUPGRADEDIST()
     fi
 
     if [[ $SEL -gt 0 && $SEL -le ${#HOSTS[@]} ]]; then
+
         source common/upgradeDistHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
         upgradeDistHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't upgrade system packages. <<<<<";
         sleep 3;
+
+        # Clear flag and reload the system package upgrade selection screen
+        FLAG[UPGRADEDIST]=0;
         ${FUNCNAME[0]};
+
     elif [[ "$SEL" =~ [Rr] ]]; then
+
+        # Clear flag and return to main screen
+        FLAG[UPGRADEDIST]=0;
         printScreen;
+
     elif [[ "$SEL" =~ [Qq] ]]; then
+
         clear;
         exit 0;
+
     else
 
         # Wrong option selected or omitted
@@ -67,5 +78,6 @@ function printScreenUPGRADEDIST()
         echo "Choose options 1 through ${#ENUMSRV[@]} to upgrade host, R to return tom ain screen or Q to exit.";
         sleep 3;
         ${FUNCNAME[0]};
+
     fi
 }
