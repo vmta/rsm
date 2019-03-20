@@ -1,0 +1,21 @@
+function getKEYbyVAL()
+{
+    local VAL ARR COUNT;
+    VAL=$1; shift;
+    ARR=("$@");
+
+    for COUNT in "${!ARR[@]}"; do
+        [[ "${ARR[$COUNT]}" == "$VAL" ]] && \
+        echo $((++COUNT)) || \
+        continue;
+    done
+}
+
+function arrayENUM()
+{
+    local ARR=("$@");
+
+    while IFS= read -rd '' ELEMENT; do
+        echo "$ELEMENT";
+    done < <(printf '%s\0' "${ARR[@]}" | sort -z);
+}
