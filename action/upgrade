@@ -10,6 +10,20 @@
 
 ###########################################################
 #
+# Upgrade packages on all hosts
+#
+function upgradeALL()
+{
+    for COUNT in "${!ENUMSRV[@]}"; do
+        source common/upgradeHOST;
+        local HOST=${ENUMSRV[$((COUNT++))]};
+        upgradeHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+    done
+    FLAG[ALL]=0;
+}
+
+###########################################################
+#
 # Choose remote host to upgrade packages. Optionally,
 # indicate if host is reachable via primitive PING test.
 #
@@ -18,6 +32,24 @@
 #
 function printScreenUPGRADE()
 {
+
+    # If upgrade of all hosts is requested, run upgrade
+    # unconditionally for all hosts, then proceed in a
+    # usual manner.
+    if [[ ${FLAG[ALL]} -eq 1 ]]; then
+
+        clear;
+
+        local STR;
+        STR+="Remote System Management\n\n";
+        STR+="Package upgrade for all hosts will begin in 3 seconds.\n";
+        echo -e $STR;
+
+        sleep 3;
+
+        upgradeALL;
+    fi
+
     clear;
 
     local STR SEL;

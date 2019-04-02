@@ -10,11 +10,43 @@
 
 ###########################################################
 #
+# Update all hosts
+#
+function updateALL()
+{
+    for COUNT in "${!ENUMSRV[@]}"; do
+        source common/updateHOST;
+        local HOST=${ENUMSRV[$((COUNT++))]};
+        updateHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+    done
+    FLAG[ALL]=0;
+}
+
+###########################################################
+#
 # Choose remote host to update package tree. Optionally,
 # indicate if host is reachable via primitive PING test.
 #
 function printScreenUPDATE()
 {
+
+    # If update of all hosts is requested, run update
+    # unconditionally for all hosts, then proceed in a
+    # usual manner.
+    if [[ ${FLAG[ALL]} -eq 1 ]]; then
+
+        clear;
+
+        local STR;
+        STR+="Remote System Management\n\n";
+        STR+="Package tree update for all hosts will begin in 3 seconds.\n";
+        echo -e $STR;
+
+        sleep 3;
+
+        updateALL;
+    fi
+
     clear;
 
     local STR SEL;
@@ -77,4 +109,5 @@ function printScreenUPDATE()
         ${FUNCNAME[0]};
 
     fi
+
 }

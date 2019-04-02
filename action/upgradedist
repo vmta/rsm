@@ -10,6 +10,20 @@
 
 ###########################################################
 #
+# Upgrade system packages on all hosts
+#
+function upgradeDistALL()
+{
+    for COUNT in "${!ENUMSRV[@]}"; do
+        source common/upgradeDistHOST;
+        local HOST=${ENUMSRV[$((COUNT++))]};
+        upgradeDistHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+    done
+    FLAG[ALL]=0;
+}
+
+###########################################################
+#
 # Choose remote host to upgrade system packages. Optionally,
 # indicate if host is reachable via primitive PING test.
 #
@@ -18,6 +32,24 @@
 #
 function printScreenUPGRADEDIST()
 {
+
+    # If dist-upgrade for all hosts is requested, run
+    # upgrade unconditionally for all hosts, then proceed
+    # in a usual manner.
+    if [[ ${FLAG[ALL]} -eq 1 ]]; then
+
+        clear;
+
+        local STR;
+        STR+="Remote System Management\n\n";
+        STR+="System package upgrade for all hosts will begin in 3 seconds.\n";
+        echo -e $STR;
+
+        sleep 3;
+
+        upgradeALL;
+    fi
+
     clear;
 
     local STR SEL;
