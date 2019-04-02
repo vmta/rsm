@@ -34,6 +34,7 @@
 #
 CFG_HOST="config/hosts";
 declare -A FLAG=( \
+          [ALL]=0 \
           [DISABLE_TEST]=0 \
           [UPDATE]=0 \
           [UPGRADE]=0 \
@@ -184,7 +185,7 @@ if [[ $# -gt 0 ]]; then
 
     OPTIONS=$( getopt \
                --options cu \
-               --longoptions connect-to:,no-ping,update,upgrade,dist-upgrade \
+               --longoptions all,connect-to,no-ping,update,upgrade,dist-upgrade \
                --name "$(basename "$0")" \
                -- "$@" );
 
@@ -194,10 +195,14 @@ if [[ $# -gt 0 ]]; then
     do
         case "$1" in
 
+            --all)
+              # Apply action to all hosts
+              FLAG[ALL]=1;
+              ;;
+
             -c)
               # Skip Main screen and load Connection screen
               FLAG[CONNECT]=1;
-#              shift;
               ;;
 
             --connect-to)
@@ -214,7 +219,6 @@ if [[ $# -gt 0 ]]; then
             --no-ping)
               # Disable PING test
               FLAG[DISABLE_TEST]=1;
-#              shift;
               ;;
 
             -u|--update)
