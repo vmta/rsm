@@ -30,7 +30,7 @@ function autocleanALL()
 function printScreenAUTOCLEAN()
 {
 
-    # If update of all hosts is requested, run update
+    # If autoclean of all hosts is requested, run it
     # unconditionally for all hosts, then proceed in a
     # usual manner.
     if [[ ${FLAG[ALL]} -eq 1 ]]; then
