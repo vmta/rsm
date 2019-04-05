@@ -36,6 +36,7 @@ CFG_HOST="config/hosts";
 declare -A FLAG=( \
           [ALL]=0 \
           [AUTOCLEAN]=0 \
+          [AUTOREMOVE]=0 \
           [DISABLE_TEST]=0 \
           [UPDATE]=0 \
           [UPGRADE]=0 \
@@ -130,6 +131,8 @@ function printScreen()
 
     if [[ ${FLAG[AUTOCLEAN]} -eq 1 ]]; then
         SELECTOR=$( getKEYbyVAL "autoclean" "${ENUMFUNC[@]}" );
+    elif [[ ${FLAG[AUTOREMOVE]} -eq 1 ]]; then
+        SELECTOR=$( getKEYbyVAL "autoremove" "${ENUMFUNC[@]}" );
     elif [[ ${FLAG[CONNECT]} -eq 1 ]]; then
         SELECTOR=$( getKEYbyVAL "connect" "${ENUMFUNC[@]}" );
     elif [[ ${FLAG[UPDATE]} -eq 1 ]]; then
@@ -188,7 +191,14 @@ if [[ $# -gt 0 ]]; then
 
     OPTIONS=$( getopt \
                --options cu \
-               --longoptions all,autoclean,connect,no-ping,update,upgrade,dist-upgrade \
+               --longoptions all \
+               --longoptions autoclean \
+               --longoptions autoremove \
+               --longoptions connect \
+               --longoptions no-ping \
+               --longoptions update \
+               --longoptions upgrade \
+               --longoptions dist-upgrade \
                --name "$(basename "$0")" \
                -- "$@" );
 
@@ -206,6 +216,11 @@ if [[ $# -gt 0 ]]; then
             --autoclean)
               # Skip Main screen and load autoclean screen
               FLAG[AUTOCLEAN]=1;
+              ;;
+
+            --autoremove)
+              # Skip Main screen and load autoremove screen
+              FLAG[AUTOREMOVE]=1;
               ;;
 
             -c|--connect)

@@ -1,0 +1,113 @@
+# DESCRIPTION Autoremove remote host packages
+
+[[ -f "common/getHostINFO" ]] && \
+    source "common/getHostINFO" || \
+    exit 1;
+
+[[ -f "common/checkHOST" ]] && \
+    source "common/checkHOST" || \
+    exit 1;
+
+###########################################################
+#
+# Autoremove on all hosts
+#
+function autoremoveALL()
+{
+    for COUNT in "${!ENUMSRV[@]}"; do
+        source common/autoremoveHOST;
+        local HOST=${ENUMSRV[$((COUNT++))]};
+        autoremoveHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+    done
+    FLAG[ALL]=0;
+}
+
+###########################################################
+#
+# Choose remote host to autoremove packages. Optionally,
+# indicate if host is reachable via primitive PING test.
+#
+function printScreenAUTOREMOVE()
+{
+
+    # If autoremove of all hosts is requested, run it
+    # unconditionally for all hosts, then proceed in a
+    # usual manner.
+    if [[ ${FLAG[ALL]} -eq 1 ]]; then
+
+        clear;
+
+        local STR;
+        STR+="Remote System Management\n\n";
+        STR+="Package autoremoval for all hosts will begin in 3 seconds.\n";
+        echo -e $STR;
+
+        sleep 3;
+
+        autoremoveALL;
+    fi
+
+    clear;
+
+    local STR SEL;
+
+    STR+="Remote System Management\n\n";
+    STR+="Select remote host to autoremove packages:\n";
+    for COUNT in "${!ENUMSRV[@]}"; do
+        # Array indexes are zero-based, which is not
+        # truly human-friendly, thus first increase
+        # the COUNT, but to reflect correct array
+        # KEY/VALUE, it shall be decreased back
+        STR+="$((++COUNT)) - ";
+        STR+=$( [[ ${FLAG[DISABLE_TEST]} -eq 0 ]] && checkHOST ${ENUMSRV[$((--COUNT))]} );
+        STR+=" ";
+        STR+=$( getDESC ${ENUMSRV[$((--COUNT))]} );
+        STR+="\n";
+    done
+    STR+="R - Return\n";
+    STR+="Q - Quit\n";
+
+    echo -e $STR;
+
+    if [[ ! -z "$1" && ! $1 -eq 0 ]]; then
+        SEL=$1;
+        echo "Your selection: " $SEL;
+        sleep 3;
+    else
+        read -p "Your selection: " SEL;
+    fi
+
+    if [[ $SEL -gt 0 && $SEL -le ${#HOSTS[@]} ]]; then
+
+        source common/autoremoveHOST;
+        local HOST=${ENUMSRV[$((--SEL))]};
+        autoremoveHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        [[ $? -ne 0 ]] && echo ">>>>> Error: can't autoremove packages. <<<<<";
+        sleep 3;
+
+        # Clear flag and reload the package tree update selection screen
+        FLAG[AUTOREMOVE]=0;
+        ${FUNCNAME[0]};
+
+    elif [[ "$SEL" =~ [Rr] ]]; then
+
+        # Clear flag and return to main screen
+        FLAG[AUTOREMOVE]=0;
+        printScreen;
+
+    elif [[ "$SEL" =~ [Qq] ]]; then
+
+        clear;
+        exit 0;
+
+    else
+
+        # Wrong option selected or omitted
+        # Inform, sleep for a while, re-run self
+        echo "Choose options 1 through ${#ENUMSRV[@]} to update host, R to return tom ain screen or Q to exit.";
+        sleep 3;
+        ${FUNCNAME[0]};
+
+    fi
+
+}

@@ -1,0 +1,22 @@
+###########################################################
+# Arg $1 shall not be empty, as it stands for remote host
+# Arg $2 shall not be empty, stands for remote host login
+# Arg $3 is optional and may be empty
+###########################################################
+function autoremoveHOST()
+{
+    if [[ $# -gt 1 ]]; then
+
+        local HOST=$( echo ${1//\"} );
+        shift;
+
+        local LOGIN=$( echo ${1//\"} );
+        shift;
+
+        local KEYS=$( echo ${@//\"} );
+
+        [[ ! -z "$HOST" && ! -z "$LOGIN" ]] && \
+            ssh -t $KEYS $LOGIN@$HOST "sudo apt-get -y autoremove";
+
+    fi
+}
