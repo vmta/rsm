@@ -10,13 +10,18 @@ function connectTERM()
         local HOST=$( echo ${1//\"} );
         shift;
 
+        local PORT=$( echo ${1//\"} );
+        shift;
+
+        [[ -z "$PORT" ]] && PORT="22";
+
         local LOGIN=$( echo ${1//\"} );
         shift;
 
         local KEYS=$( echo ${@//\"} );
 
         [[ ! -z "$HOST" && ! -z "$LOGIN" ]] && \
-            ssh $KEYS $LOGIN@$HOST;
+            ssh -p $PORT $KEYS $LOGIN@$HOST;
 
     fi
 }

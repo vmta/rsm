@@ -49,7 +49,7 @@ function printScreenCONNECT()
 
         source common/connectTERM;
         local HOST=${ENUMSRV[$((--SEL))]};
-        connectTERM $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        connectTERM $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't login or exit not clean. <<<<<";
         sleep 3;
 

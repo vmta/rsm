@@ -17,7 +17,7 @@ function updateALL()
     for COUNT in "${!ENUMSRV[@]}"; do
         source common/updateHOST;
         local HOST=${ENUMSRV[$((COUNT++))]};
-        updateHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        updateHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
     done
     FLAG[ALL]=0;
 }
@@ -81,7 +81,7 @@ function printScreenUPDATE()
 
         source common/updateHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
-        updateHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        updateHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't update package tree. <<<<<";
         sleep 3;
 

@@ -12,6 +12,6 @@ function readCFG()
 
         HOST=$(echo ${HOST,,} | sed 's/\(\[\)\(.*\)\(\]\)/\2/');
 
-        HOSTS+=( [$HOST]="${ARGH['desc']}|${ARGH['login']}|${ARGH['keys']}" );
+        HOSTS+=( [$HOST]="${ARGH['desc']}|${ARGH['port']}|${ARGH['login']}|${ARGH['keys']}" );
     done
 }

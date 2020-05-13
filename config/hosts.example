@@ -1,11 +1,14 @@
 [1.1.1.1]
 desc=Pretty remote host description
+port=22
 login=user
 
 [1.1.1.2]
 desc=Even prettier remote host description
+port=22
 login=user
 keys="-i ~/.ssh/remote_host_key.pem"
 
 [1.1.1.3]
+port=22
 login="anotheruser"

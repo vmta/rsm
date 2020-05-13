@@ -17,7 +17,7 @@ function upgradeDistALL()
     for COUNT in "${!ENUMSRV[@]}"; do
         source common/upgradeDistHOST;
         local HOST=${ENUMSRV[$((COUNT++))]};
-        upgradeDistHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        upgradeDistHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
     done
     FLAG[ALL]=0;
 }
@@ -84,7 +84,7 @@ function printScreenUPGRADEDIST()
 
         source common/upgradeDistHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
-        upgradeDistHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        upgradeDistHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't upgrade system packages. <<<<<";
         sleep 3;
 

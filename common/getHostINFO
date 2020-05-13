@@ -8,16 +8,23 @@ function getDESC()
 }
 #####################################################################
 #
+# Retrieve remote host port if any, from HOSTS array.
+function getPORT()
+{
+    echo ${HOSTS[$1]} | awk -F'|' '{print $2}';
+}
+#####################################################################
+#
 # Retrieve remote host login from HOSTS array.
 #
 function getLOGIN()
 {
-    echo ${HOSTS[$1]} | awk -F'|' '{print $2}';
+    echo ${HOSTS[$1]} | awk -F'|' '{print $3}';
 }
 #####################################################################
 #
 # Retrieve remote host SSH keys if any, from HOSTS array.
 function getKEYS()
 {
-    echo ${HOSTS[$1]} | awk -F'|' '{print $3}';
+    echo ${HOSTS[$1]} | awk -F'|' '{print $4}';
 }

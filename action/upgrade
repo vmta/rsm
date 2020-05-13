@@ -17,7 +17,7 @@ function upgradeALL()
     for COUNT in "${!ENUMSRV[@]}"; do
         source common/upgradeHOST;
         local HOST=${ENUMSRV[$((COUNT++))]};
-        upgradeHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        upgradeHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
     done
     FLAG[ALL]=0;
 }
@@ -84,7 +84,7 @@ function printScreenUPGRADE()
 
         source common/upgradeHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
-        upgradeHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        upgradeHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't upgrade packages. <<<<<";
         sleep 3;
 

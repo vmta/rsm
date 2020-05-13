@@ -195,6 +195,7 @@ if [[ $# -gt 0 ]]; then
                --longoptions autoclean \
                --longoptions autoremove \
                --longoptions connect \
+               --longoptions help \
                --longoptions no-ping \
                --longoptions update \
                --longoptions upgrade \
@@ -238,6 +239,10 @@ if [[ $# -gt 0 ]]; then
 #              done
 #              shift;
 #              ;;
+
+            --help)
+              # Display help
+              ;;
 
             --no-ping)
               # Disable PING test

@@ -17,7 +17,7 @@ function autoremoveALL()
     for COUNT in "${!ENUMSRV[@]}"; do
         source common/autoremoveHOST;
         local HOST=${ENUMSRV[$((COUNT++))]};
-        autoremoveHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        autoremoveHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
     done
     FLAG[ALL]=0;
 }
@@ -81,7 +81,7 @@ function printScreenAUTOREMOVE()
 
         source common/autoremoveHOST;
         local HOST=${ENUMSRV[$((--SEL))]};
-        autoremoveHOST $HOST $(getLOGIN ${HOST}) $(getKEYS ${HOST});
+        autoremoveHOST $HOST $(getPORT ${HOST}) $(getLOGIN ${HOST}) $(getKEYS ${HOST});
         [[ $? -ne 0 ]] && echo ">>>>> Error: can't autoremove packages. <<<<<";
         sleep 3;
 

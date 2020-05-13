@@ -10,13 +10,18 @@ function upgradeHOST()
         local HOST=$( echo ${1//\"} );
         shift;
 
+        local PORT=$( echo ${1//\"} );
+        shift;
+
+        [[ -z "$PORT" ]] && PORT="22";
+
         local LOGIN=$( echo ${1//\"} );
         shift;
 
         local KEYS=$( echo ${@//\"} );
 
         [[ ! -z "$HOST" && ! -z "$LOGIN" ]] && \
-            ssh -t $KEYS $LOGIN@$HOST "sudo apt-get -y upgrade";
+            ssh -p $PORT -t $KEYS $LOGIN@$HOST "sudo apt-get -y upgrade";
 
     fi
 }
